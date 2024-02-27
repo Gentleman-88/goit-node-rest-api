@@ -1,11 +1,11 @@
 import { readFile, writeFile } from "fs/promises";
 import { nanoid } from "nanoid";
-import { fileURLToPath } from "url";
+import fs from "fs/promises";
 import path from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-
-const contactsPath = path.join(__filename, "..", "db", "contacts.json");
+const contactsPath = path.resolve("db", "contacts.json");
+const updateContacts = (contacts) =>
+  fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
 export async function listContacts() {
   const data = await readFile(contactsPath, "utf-8");

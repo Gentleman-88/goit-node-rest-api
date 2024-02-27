@@ -5,7 +5,10 @@ export const getAllContacts = async (req, res) => {
   res.json(result);
 };
 
-export const getOneContact = (req, res) => {};
+export const getOneContact = async (req, res) => {
+  const result = await contactsService.getContactById();
+  res.json(result);
+};
 
 export const deleteContact = (req, res) => {};
 
