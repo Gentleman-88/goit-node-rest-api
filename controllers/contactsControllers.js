@@ -73,14 +73,14 @@ export const updateContact = async (req, res, next) => {
 
 export const contactStatusUpdate = async (req, res, next) => {
   try {
-    const { error } = updateContactSchema.validate(req.body);
+    const { error } = updateContactStatusSchema.validate(req.body);
     if (error) {
       throw HttpError(400, "Favorite status must be a boolean value");
     }
     const { id } = req.params;
     const result = await contactsServices.updateContactStatus(id, req.body);
-    if (!id) {
-      throw HttpError(404, "Not found");
+    if (!result) {
+      throw HttpError(404);
     }
     res.json(result);
   } catch (error) {
