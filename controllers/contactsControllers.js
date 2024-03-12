@@ -3,6 +3,7 @@ import HttpError from "../helpers/HttpError.js";
 import {
   createContactSchema,
   updateContactSchema,
+  updateContactStatusSchema,
 } from "../schemas/contactsSchemas.js";
 
 export const getAllContacts = async (req, res, next) => {
@@ -42,7 +43,7 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { error } = updateContactSchema.validate(req.body);
+    const { error } = createContactSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
@@ -75,12 +76,12 @@ export const contactStatusUpdate = async (req, res, next) => {
   try {
     const { error } = updateContactStatusSchema.validate(req.body);
     if (error) {
-      throw HttpError(400, "Favorite status must be a boolean value");
+      throw HttpError(400, error.message);
     }
     const { id } = req.params;
     const result = await contactsServices.updateContactStatus(id, req.body);
     if (!result) {
-      throw HttpError(404);
+      throw HttpError(404, error.message);
     }
     res.json(result);
   } catch (error) {
