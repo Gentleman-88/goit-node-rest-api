@@ -3,14 +3,11 @@ import jwt from "jsonwebtoken";
 
 import HttpError from "../helpers/HttpError.js";
 
-// const { JWT_SECRET } = process.env;
-// console.log(JWT_SECRET);
-
 const signup = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
   if (user) {
-    throw HttpError(409, "Email in use");
+    throw HttpError(409, error.message);
   }
   const newUser = await authServices.signup(req.body);
 
@@ -24,7 +21,7 @@ const signin = async (req, res) => {
   const { email, password } = req.body;
   const user = await authServices.findUser({ email });
   if (!user) {
-    throw HttpError(401, "Email or password invalid");
+    throw HttpError(401, error.message);
   }
   const comparePassword = await authServices.validatePassword(
     password,
