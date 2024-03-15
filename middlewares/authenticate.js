@@ -14,9 +14,12 @@ const authenticate = async (req, res, next) => {
   }
   try {
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
-    const user = findUser({ _id: id });
+    const user = await findUser({ _id: id });
     if (!user) {
       return next(HttpError(401, "User not found"));
+    }
+    if (!user.token) {
+      return next(HttpError(401, "User already signout"));
     }
     req.user = user;
     next();

@@ -1,6 +1,7 @@
 import express from "express";
 import authController from "../controllers/authController.js";
 import validateBody from "../decorators/validateBody.js";
+import authenticate from "../middlewares/authenticate.js";
 
 import { userSignupSchema, userSigninSchema } from "../schemas/usersSchemas.js";
 
@@ -17,5 +18,8 @@ authRouter.post(
   validateBody(userSigninSchema),
   authController.signin
 );
+
+authRouter.get("/current", authenticate, authController.getCurrent);
+authRouter.post("/signout", authenticate, authController.signout);
 
 export default authRouter;
