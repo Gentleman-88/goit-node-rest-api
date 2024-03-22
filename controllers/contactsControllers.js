@@ -1,10 +1,14 @@
 import * as contactsService from "../services/contactsServices.js";
+import fs from "fs/promises";
+import path from "path";
 import HttpError from "../helpers/HttpError.js";
 import {
   createContactSchema,
   updateContactSchema,
   updateContactStatusSchema,
 } from "../schemas/contactsSchemas.js";
+
+const avatarPath = path.resolve("public", "avatars");
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -25,7 +29,6 @@ export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { _id: owner } = req.user;
-    // const result = await contactsService.getContactById(id);
     const result = await contactsService.getOneContact({ _id: id, owner });
     if (!result) {
       throw HttpError(404, error.message);
@@ -53,11 +56,19 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const { _id: owner } = req.user;
+    const { path: oldPath, filename } = req.file;
+    const newPath = path.join(avatarPath, filename);
+    await fs.rename(oldPath, newPath);
+    const avatar = path.join("public", "avatars", filename);
     const { error } = createContactSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
-    const result = await contactsService.addContact({ ...req.body, owner });
+    const result = await contactsService.addContact({
+      ...req.body,
+      avatar,
+      owner,
+    });
     res.status(201).json(result);
   } catch (error) {
     next(error);
