@@ -13,4 +13,22 @@ export const validatePassword = (password, hashPassword) =>
 
 export const updateUser = (filter, data) => User.findOneAndUpdate(filter, data);
 
+export const updateUserAvatar = async (userId, avatarURL) => {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    user.avatarURL = avatarURL;
+
+    await user.save();
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const deleteUsers = (filter) => User.deleteMany(filter);

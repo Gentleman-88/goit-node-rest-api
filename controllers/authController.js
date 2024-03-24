@@ -1,19 +1,30 @@
 import * as authServices from "../services/authServices.js";
 import jwt from "jsonwebtoken";
-
+import fs from "fs/promises";
+import path from "path";
 import HttpError from "../helpers/HttpError.js";
+
+const avatarPath = path.resolve("public", "avatars");
 
 const signup = async (req, res) => {
   const { email } = req.body;
+  const { path: oldPath, filename } = req.file;
+  const newPath = path.join(avatarPath, filename);
+  await fs.rename(oldPath, newPath);
+  const avatar = path.join("public", "avatars", filename);
   const user = await authServices.findUser({ email });
   if (user) {
     throw HttpError(409, error.message);
   }
-  const newUser = await authServices.signup(req.body);
+  const newUser = await authServices.signup({
+    ...req.body,
+    avatar,
+  });
 
   res.status(201).json({
     email: newUser.email,
     subscription: newUser.subscription,
+    avatar: newUser.avatar,
   });
 };
 
@@ -62,9 +73,28 @@ const signout = async (req, res) => {
   });
 };
 
+const updateAvatar = async (req, res) => {
+  try {
+    const { filename } = req.file;
+
+    const updatedUser = await authServices.updateUserAvatar(
+      req.user._id,
+      filename
+    );
+
+    res.status(200).json({
+      avatarURL: updatedUser.avatarURL,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export default {
   signup: signup,
   signin: signin,
   getCurrent: getCurrent,
   signout: signout,
+  updateAvatar: updateAvatar,
 };

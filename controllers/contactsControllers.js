@@ -1,14 +1,10 @@
 import * as contactsService from "../services/contactsServices.js";
-import fs from "fs/promises";
-import path from "path";
 import HttpError from "../helpers/HttpError.js";
 import {
   createContactSchema,
   updateContactSchema,
   updateContactStatusSchema,
 } from "../schemas/contactsSchemas.js";
-
-const avatarPath = path.resolve("public", "avatars");
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -55,20 +51,11 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { _id: owner } = req.user;
-    const { path: oldPath, filename } = req.file;
-    const newPath = path.join(avatarPath, filename);
-    await fs.rename(oldPath, newPath);
-    const avatar = path.join("public", "avatars", filename);
     const { error } = createContactSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
-    const result = await contactsService.addContact({
-      ...req.body,
-      avatar,
-      owner,
-    });
+    const result = await contactsService.addContact(req.body);
     res.status(201).json(result);
   } catch (error) {
     next(error);
