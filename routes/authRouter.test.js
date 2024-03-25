@@ -4,7 +4,7 @@ import { findUser, deleteUsers, signup } from "../services/authServices.js";
 import app from "../app.js";
 import bcrypt from "bcrypt";
 
-describe("test /signup route", () => {
+describe("test /register route", () => {
   let server = null;
   beforeAll(async () => {
     await mongoose.connect(process.env.TEST_DB_HOST);
@@ -20,14 +20,14 @@ describe("test /signup route", () => {
     await deleteUsers({});
   });
 
-  test("test /signup with correct data", async () => {
+  test("test /register with correct data", async () => {
     const signupData = {
       email: "bron@gmail.com",
       password: "123456",
     };
 
     const { statusCode, body } = await request(app)
-      .post("/api/auth/signup")
+      .post("/api/user/register")
       .send(signupData);
     expect(statusCode).toBe(201);
 
@@ -67,7 +67,7 @@ describe("test /signin route", () => {
     };
 
     const { statusCode, body } = await request(app)
-      .post("/api/auth/signin")
+      .post("/api/user/signin")
       .send(signinData);
     expect(statusCode).toBe(200);
 
@@ -87,7 +87,7 @@ describe("test /signin route", () => {
     };
 
     const { statusCode } = await request(app)
-      .post("/api/auth/signin")
+      .post("/api/user/signin")
       .send(signinData);
     expect(statusCode).toBe(401);
   });
@@ -104,7 +104,7 @@ describe("test /signin route", () => {
     };
 
     const { statusCode } = await request(app)
-      .post("/api/auth/signin")
+      .post("/api/user/signin")
       .send(signinData);
     expect(statusCode).toBe(401);
   });
