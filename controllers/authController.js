@@ -1,24 +1,27 @@
 import * as authServices from "../services/authServices.js";
 import jwt from "jsonwebtoken";
 import HttpError from "../helpers/HttpError.js";
+import fs from "fs/promises";
+import path from "path";
 import gravatar from "gravatar";
+import Jimp from "jimp";
 
 const signup = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
   if (user) {
-    throw HttpError(409, error.message);
+    throw new HttpError(409, error.message);
   }
-  const avatar = gravatar.url(email, { s: "200", r: "pg", d: "identicon" });
+  const avatarURL = gravatar.url(email, { s: "200", r: "pg", d: "identicon" });
   const newUser = await authServices.signup({
     ...req.body,
-    avatar,
+    avatarURL,
   });
 
   res.status(201).json({
     email: newUser.email,
     subscription: newUser.subscription,
-    avatar: newUser.avatar,
+    avatarURL: newUser.avatarURL,
   });
 };
 
@@ -68,21 +71,27 @@ const signout = async (req, res) => {
 };
 
 const updateAvatar = async (req, res) => {
-  try {
-    const { filename } = req.file;
+  const { _id: id } = req.user;
+  const { path: oldPath, filename } = req.file;
 
-    const updatedUser = await authServices.updateUserAvatar(
-      req.user._id,
-      filename
-    );
+  console.log(filename);
 
-    res.status(200).json({
-      avatarURL: updatedUser.avatarURL,
+  Jimp.read(filename)
+    .then((avatar) => {
+      return avatar.resize(250, 250).quality(60).greyscale().write(filename);
+    })
+    .catch((err) => {
+      console.error(err);
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
-  }
+
+  const newPath = path.join(avatarsPath, filename);
+  await fs.rename(oldPath, newPath);
+  const newAvatar = path.join("public", "avatars", filename);
+  const result = await authServices.updateUserAvatar(id, {
+    avatarURL: newAvatar,
+  });
+
+  res.json(result);
 };
 
 export default {
