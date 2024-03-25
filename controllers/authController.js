@@ -1,21 +1,15 @@
 import * as authServices from "../services/authServices.js";
 import jwt from "jsonwebtoken";
-import fs from "fs/promises";
-import path from "path";
 import HttpError from "../helpers/HttpError.js";
-
-const avatarPath = path.resolve("public", "avatars");
+import gravatar from "gravatar";
 
 const signup = async (req, res) => {
   const { email } = req.body;
-  const { path: oldPath, filename } = req.file;
-  const newPath = path.join(avatarPath, filename);
-  await fs.rename(oldPath, newPath);
-  const avatar = path.join("public", "avatars", filename);
   const user = await authServices.findUser({ email });
   if (user) {
     throw HttpError(409, error.message);
   }
+  const avatar = gravatar.url(email, { s: "200", r: "pg", d: "identicon" });
   const newUser = await authServices.signup({
     ...req.body,
     avatar,
