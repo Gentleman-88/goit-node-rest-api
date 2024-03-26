@@ -6,6 +6,8 @@ import path from "path";
 import gravatar from "gravatar";
 import Jimp from "jimp";
 
+const avatarsPath = path.resolve("public", "avatars");
+
 const signup = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
@@ -73,8 +75,6 @@ const signout = async (req, res) => {
 const updateAvatar = async (req, res) => {
   const { _id: id } = req.user;
   const { path: oldPath, filename } = req.file;
-
-  console.log(filename);
 
   Jimp.read(filename)
     .then((avatar) => {
