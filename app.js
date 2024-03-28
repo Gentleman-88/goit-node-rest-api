@@ -1,7 +1,8 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import mongoose, { mongo } from "mongoose";
+import nodemailer from "nodemailer";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 import authRouter from "./routes/authRouter.js";

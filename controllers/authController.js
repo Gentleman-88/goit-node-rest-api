@@ -1,5 +1,7 @@
 import * as authServices from "../services/authServices.js";
 import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
+import sendEmail from "../helpers/sendEmail.js";
 import HttpError from "../helpers/HttpError.js";
 import fs from "fs/promises";
 import path from "path";
@@ -14,11 +16,22 @@ const signup = async (req, res) => {
   if (user) {
     throw new HttpError(409, error.message);
   }
+  const verificationToken = nanoid();
+
   const avatarURL = gravatar.url(email, { s: "200", r: "pg", d: "identicon" });
   const newUser = await authServices.signup({
     ...req.body,
     avatarURL,
+    verificationToken,
   });
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify email",
+    html: `<a href="${process.env.BASE_URL}/api/user/verify/${verificationToken}" target="_blanck">Click to verify</a>`,
+  };
+
+  await sendEmail(verifyEmail);
 
   res.status(201).json({
     email: newUser.email,
